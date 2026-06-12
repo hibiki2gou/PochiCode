@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { SafeAreaView, Text, TextInput, View } from 'react-native';
+import { SafeAreaView, TextInput, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 import Header from './src/components/Header';
 import SnippetBar from './src/components/SnippetBar';
 import { styles } from './src/styles';
@@ -38,10 +39,10 @@ export default function App() {
                         autoCorrect={false}
                     />
                 ) : (
-                    <View style={styles.previewContainer}>
-                        <Text style={styles.previewText}>ここにWebプレビューが表示されます</Text>
-                        <Text style={styles.previewSubText}>プレビュー内容</Text>
-                    </View>
+                    <WebView
+                        style={{ flex: 1, backgroundColor: '#fff' }}
+                        source={{ html: code }}
+                    />
                 )}
             </View>
 

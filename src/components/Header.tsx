@@ -1,7 +1,13 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '../styles';
+import { TabType } from '../types';
 
-export default function Header({ activeTab, setActiveTab }) {
+interface HeaderProps {
+    activeTab: TabType;
+    setActiveTab: (tab: TabType) => void;
+}
+
+export default function Header({ activeTab, setActiveTab }: HeaderProps) {
     return (
         <View style={styles.header}>
             <TouchableOpacity

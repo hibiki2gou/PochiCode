@@ -14,5 +14,5 @@ export const styles = StyleSheet.create({
     previewSubText: { fontSize: 14, color: '#888' },
     snippetBar: { height: 50, backgroundColor: '#2d2d2d', flexDirection: 'row', alignItems: 'center' },
     snippetButton: { paddingHorizontal: 15, justifyContent: 'center', alignItems: 'center', borderRightWidth: 1, borderColor: '#444' },
-    snippetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' }
+    snippetButtonText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
 });

@@ -27,6 +27,31 @@
 
 ---
 
+## 📁 プロジェクト構成 (Project Structure)
+
+```
+PochiCode/
+├── App.tsx                      # ルートコンポーネント（状態管理・スニペットロジック）
+├── src/
+│   ├── types.ts                 # 型定義（TabType, Selection）
+│   ├── styles.ts                # スタイル定義
+│   └── components/
+│       ├── Header.tsx           # タブ切り替えヘッダー（エディタ / プレビュー）
+│       ├── MainArea.tsx         # メインエリア（TextInput or WebView）
+│       └── SnippetBar.tsx       # スニペットボタンバー
+└── CHANGELOG.md                 # 変更履歴
+```
+
+### 主な機能
+| 機能 | 説明 |
+|------|------|
+| コードエディタ | モノスペースフォントのコード入力エリア |
+| HTMLプレビュー | WebViewでHTMLをリアルタイム描画 |
+| スニペットバー | `<`, `>`, `{`, `(` などをワンタップ入力 |
+| 自動閉じカッコ | `{`, `(`, `"` 入力時に閉じカッコを自動補完 |
+
+---
+
 ## ⚠️ トラブルシューティング (Troubleshooting)
 
 ### Q1. 「Project is incompatible with this version of Expo Go」というエラーが出る
@@ -40,10 +65,10 @@ npx expo start -c
 ```
 
 ### Q2. 赤い画面で「Element type is invalid...」または「Unable to resolve "../../App"」というエラーが出る
-**原因:** Expoの初期テンプレートに含まれる「Expo Router（`app` フォルダ）」機能と競合している、または `App.js` を見失っている。
-**解決策:** 複雑なルーティングを解除し、シンプルな `App.js` 構成に戻す。
+**原因:** Expoの初期テンプレートに含まれる「Expo Router（`app` フォルダ）」機能と競合している、または `App.tsx` を見失っている。
+**解決策:** 複雑なルーティングを解除し、シンプルな `App.tsx` 構成に戻す。
 1. `app` フォルダが存在する場合は、フォルダごと削除する。
 2. `package.json` の `"main"` を `"expo/AppEntry.js"` に書き換える。
-3. プロジェクトのルートディレクトリ（一番上の階層）に `App.js` を作成し、コードを記述する。
+3. プロジェクトのルートディレクトリ（一番上の階層）に `App.tsx` を作成し、コードを記述する。
 4. `npx expo start -c` で再起動する。
 ```

@@ -1,7 +1,11 @@
 import { KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { styles } from '../styles';
 
-export default function SnippetBar({ handleSnippetPress }) {
+interface SnippetBarProps {
+    handleSnippetPress: (snippet: string) => void;
+}
+
+export default function SnippetBar({ handleSnippetPress }: SnippetBarProps) {
     const snippets = ['<', '>', '/', '=', '"', "'", '{', '}', '(', ')', ';', ':', 'スペース', '改行'];
 
     return (

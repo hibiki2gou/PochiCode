@@ -8,7 +8,7 @@ interface MainAreaProps {
     activeTab: TabType;
     code: string;
     setCode: (code: string) => void;
-    textInputRef: RefObject<TextInput>;
+    textInputRef: RefObject<TextInput | null>;
     setSelection: (selection: Selection) => void;
 }
 

@@ -17,41 +17,48 @@ export default function App() {
 
     const handleSnippetPress = (snippet: string): void => {
         const { start, end } = selection;
-        const beforeText = code.substring(0, start);
-        const afterText = code.substring(end);
-
-        let insertText = snippet === 'スペース' ? ' ' : snippet === '改行' ? '\n' : snippet;
-
+        const insertText = snippet === 'スペース' ? ' ' : snippet === '改行' ? '\n' : snippet;
         const nextChar = code.charAt(end);
 
-        // すでに閉じカッコが入力済みの場合はカーソルだけ進める
-        if (CLOSING_CHARS.has(insertText) && nextChar === insertText) {
-            textInputRef.current?.setNativeProps({
-                selection: { start: start + 1, end: start + 1 },
-            });
+        const moveCursor = (pos: number) => {
+            setSelection({ start: pos, end: pos });
+            setTimeout(() => {
+                textInputRef.current?.setNativeProps({ selection: { start: pos, end: pos } });
+            }, 10);
+        };
+
+        // `>` を除く閉じカッコが次の文字と一致する場合はカーソルをスキップ
+        if (CLOSING_CHARS.has(insertText) && insertText !== '>' && nextChar === insertText) {
+            moveCursor(start + 1);
             return;
         }
 
-        // 開きカッコの場合は閉じカッコを自動補完する
-        if (PAIRS[insertText] && (nextChar === '' || nextChar === ' ' || nextChar === '\n')) {
-            insertText = insertText + PAIRS[insertText];
-            setCode(beforeText + insertText + afterText);
-            setTimeout(() => {
-                textInputRef.current?.setNativeProps({
-                    selection: { start: start + 1, end: start + 1 },
-                });
-            }, 10);
-            return;
+        // 開きカッコの処理
+        if (PAIRS[insertText]) {
+            const matchingClose = PAIRS[insertText];
+            const beforeText = code.substring(0, start);
+            const afterText = code.substring(end);
+
+            if (nextChar === matchingClose && insertText !== matchingClose) {
+                // 対応する閉じカッコの直後に新たなペアを挿入（例: <> → <><>）
+                const newCode = code.substring(0, end + 1) + insertText + matchingClose + code.substring(end + 1);
+                setCode(newCode);
+                moveCursor(end + 2);
+                return;
+            }
+
+            if (nextChar === '' || nextChar === ' ' || nextChar === '\n') {
+                setCode(beforeText + insertText + matchingClose + afterText);
+                moveCursor(start + 1);
+                return;
+            }
         }
 
         // 通常入力
+        const beforeText = code.substring(0, start);
+        const afterText = code.substring(end);
         setCode(beforeText + insertText + afterText);
-        setTimeout(() => {
-            const newPos = start + insertText.length;
-            textInputRef.current?.setNativeProps({
-                selection: { start: newPos, end: newPos },
-            });
-        }, 10);
+        moveCursor(start + insertText.length);
     };
 
     return (

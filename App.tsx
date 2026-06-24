@@ -22,13 +22,10 @@ export default function App() {
 
         const moveCursor = (pos: number) => {
             setSelection({ start: pos, end: pos });
-            setTimeout(() => {
-                textInputRef.current?.setNativeProps({ selection: { start: pos, end: pos } });
-            }, 10);
         };
 
-        // `>` を除く閉じカッコが次の文字と一致する場合はカーソルをスキップ
-        if (CLOSING_CHARS.has(insertText) && insertText !== '>' && nextChar === insertText) {
+        // 閉じカッコが次の文字と一致する場合はカーソルをスキップ
+        if (CLOSING_CHARS.has(insertText) && nextChar === insertText) {
             moveCursor(start + 1);
             return;
         }
@@ -68,8 +65,9 @@ export default function App() {
                 activeTab={activeTab}
                 code={code}
                 setCode={setCode}
-                textInputRef={textInputRef}
+                selection={selection}
                 setSelection={setSelection}
+                textInputRef={textInputRef}
             />
             {activeTab === 'editor' && (
                 <SnippetBar handleSnippetPress={handleSnippetPress} />

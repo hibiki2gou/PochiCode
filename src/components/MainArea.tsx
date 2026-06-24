@@ -8,11 +8,12 @@ interface MainAreaProps {
     activeTab: TabType;
     code: string;
     setCode: (code: string) => void;
-    textInputRef: RefObject<TextInput | null>;
+    selection: Selection;
     setSelection: (selection: Selection) => void;
+    textInputRef: RefObject<TextInput | null>;
 }
 
-export default function MainArea({ activeTab, code, setCode, textInputRef, setSelection }: MainAreaProps) {
+export default function MainArea({ activeTab, code, setCode, selection, setSelection, textInputRef }: MainAreaProps) {
     return (
         <View style={styles.main}>
             {activeTab === 'editor' ? (
@@ -22,6 +23,7 @@ export default function MainArea({ activeTab, code, setCode, textInputRef, setSe
                     multiline
                     placeholder="ここにコードをポチポチ書きます..."
                     value={code}
+                    selection={selection}
                     onChangeText={setCode}
                     onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
                     autoCapitalize="none"

@@ -15,6 +15,21 @@ export default function App() {
     const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
     const textInputRef = useRef<TextInput>(null);
 
+    const handleChangeText = (newCode: string): void => {
+        if (newCode.length === code.length - 1) {
+            const deletedPos = selection.start - 1;
+            const deletedChar = code[deletedPos];
+
+            if (deletedChar && PAIRS[deletedChar] && newCode[deletedPos] === PAIRS[deletedChar]) {
+                const withBothDeleted = newCode.substring(0, deletedPos) + newCode.substring(deletedPos + 1);
+                setCode(withBothDeleted);
+                setSelection({ start: deletedPos, end: deletedPos });
+                return;
+            }
+        }
+        setCode(newCode);
+    };
+
     const handleSnippetPress = (snippet: string): void => {
         const { start, end } = selection;
         const insertText = snippet === 'スペース' ? ' ' : snippet === '改行' ? '\n' : snippet;
@@ -64,7 +79,7 @@ export default function App() {
             <MainArea
                 activeTab={activeTab}
                 code={code}
-                setCode={setCode}
+                setCode={handleChangeText}
                 selection={selection}
                 setSelection={setSelection}
                 textInputRef={textInputRef}

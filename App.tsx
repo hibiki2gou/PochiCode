@@ -6,7 +6,7 @@ import SnippetBar from './src/components/SnippetBar';
 import { styles } from './src/styles';
 import { Selection, TabType } from './src/types';
 
-const PAIRS: Record<string, string> = { '{': '}', '(': ')', '"': '"', "'": "'", '<': '>' };
+const PAIRS: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'", '<': '>' };
 const CLOSING_CHARS = new Set(Object.values(PAIRS));
 
 export default function App() {

@@ -14,6 +14,7 @@ export default function App() {
     const [code, setCode] = useState<string>('');
     const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
     const [undoStack, setUndoStack] = useState<{ code: string; selection: Selection }[]>([]);
+    const [redoStack, setRedoStack] = useState<{ code: string; selection: Selection }[]>([]);
     const textInputRef = useRef<TextInput>(null);
     const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isTypingRef = useRef(false);
@@ -29,6 +30,7 @@ export default function App() {
         if (!isTypingRef.current) {
             isTypingRef.current = true;
             setUndoStack(prev => [...prev, { code, selection }]);
+            setRedoStack([]);
         }
         if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
         undoTimerRef.current = setTimeout(() => {
@@ -56,14 +58,27 @@ export default function App() {
             clearTypingBurst();
             const prev = undoStack[undoStack.length - 1];
             setUndoStack(undoStack.slice(0, -1));
+            setRedoStack(prev => [...prev, { code, selection }]);
             setCode(prev.code);
             setSelection(prev.selection);
             return;
         }
 
-        // スニペットは常に独立したUndoポイント
+        if (snippet === '↪') {
+            if (redoStack.length === 0) return;
+            clearTypingBurst();
+            const next = redoStack[redoStack.length - 1];
+            setRedoStack(redoStack.slice(0, -1));
+            setUndoStack(prev => [...prev, { code, selection }]);
+            setCode(next.code);
+            setSelection(next.selection);
+            return;
+        }
+
+        // スニペットは常に独立したUndoポイント（Redoはリセット）
         clearTypingBurst();
         setUndoStack(prev => [...prev, { code, selection }]);
+        setRedoStack([]);
 
         const { start, end } = selection;
         const insertText = snippet === 'Tab' ? '  ' : snippet === '改行' ? '\n' : snippet;

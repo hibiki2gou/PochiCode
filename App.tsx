@@ -13,9 +13,29 @@ export default function App() {
     const [activeTab, setActiveTab] = useState<TabType>('editor');
     const [code, setCode] = useState<string>('');
     const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
+    const [undoStack, setUndoStack] = useState<{ code: string; selection: Selection }[]>([]);
     const textInputRef = useRef<TextInput>(null);
+    const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isTypingRef = useRef(false);
+
+    const clearTypingBurst = () => {
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = null;
+        isTypingRef.current = false;
+    };
 
     const handleChangeText = (newCode: string): void => {
+        // タイピングバースト開始時にスナップショットを保存
+        if (!isTypingRef.current) {
+            isTypingRef.current = true;
+            setUndoStack(prev => [...prev, { code, selection }]);
+        }
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = setTimeout(() => {
+            isTypingRef.current = false;
+            undoTimerRef.current = null;
+        }, 500);
+
         if (newCode.length === code.length - 1) {
             const deletedPos = selection.start - 1;
             const deletedChar = code[deletedPos];
@@ -31,6 +51,20 @@ export default function App() {
     };
 
     const handleSnippetPress = (snippet: string): void => {
+        if (snippet === '↩') {
+            if (undoStack.length === 0) return;
+            clearTypingBurst();
+            const prev = undoStack[undoStack.length - 1];
+            setUndoStack(undoStack.slice(0, -1));
+            setCode(prev.code);
+            setSelection(prev.selection);
+            return;
+        }
+
+        // スニペットは常に独立したUndoポイント
+        clearTypingBurst();
+        setUndoStack(prev => [...prev, { code, selection }]);
+
         const { start, end } = selection;
         const insertText = snippet === 'Tab' ? '  ' : snippet === '改行' ? '\n' : snippet;
         const nextChar = code.charAt(end);

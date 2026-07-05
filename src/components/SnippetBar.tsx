@@ -6,7 +6,7 @@ interface SnippetBarProps {
 }
 
 export default function SnippetBar({ handleSnippetPress }: SnippetBarProps) {
-    const snippets = ['<', '>', '/', '=', '"', "'", '{', '}', '(', ')', '[', ']', ';', ':', 'スペース', '改行'];
+    const snippets = ['<', '>', '/', '=', '"', "'", '{', '}', '(', ')', '[', ']', ';', ':', 'Tab', '改行'];
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

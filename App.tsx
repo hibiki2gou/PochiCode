@@ -32,7 +32,7 @@ export default function App() {
 
     const handleSnippetPress = (snippet: string): void => {
         const { start, end } = selection;
-        const insertText = snippet === 'スペース' ? ' ' : snippet === '改行' ? '\n' : snippet;
+        const insertText = snippet === 'Tab' ? '  ' : snippet === '改行' ? '\n' : snippet;
         const nextChar = code.charAt(end);
 
         const moveCursor = (pos: number) => {

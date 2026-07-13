@@ -8,7 +8,7 @@ interface MainAreaProps {
     activeTab: TabType;
     code: string;
     setCode: (code: string) => void;
-    selection: Selection;
+    selection: Selection | null;
     setSelection: (selection: Selection) => void;
     textInputRef: RefObject<TextInput | null>;
 }
@@ -23,7 +23,7 @@ export default function MainArea({ activeTab, code, setCode, selection, setSelec
                     multiline
                     placeholder="ここにコードをポチポチ書きます..."
                     value={code}
-                    selection={selection}
+                    selection={selection ?? undefined}
                     onChangeText={setCode}
                     onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
                     autoCapitalize="none"

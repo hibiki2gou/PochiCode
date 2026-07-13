@@ -13,6 +13,7 @@ export default function App() {
     const [activeTab, setActiveTab] = useState<TabType>('editor');
     const [code, setCode] = useState<string>('');
     const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
+    const [forcedSelection, setForcedSelection] = useState<Selection | null>(null);
     const [undoStack, setUndoStack] = useState<{ code: string; selection: Selection }[]>([]);
     const [redoStack, setRedoStack] = useState<{ code: string; selection: Selection }[]>([]);
     const textInputRef = useRef<TextInput>(null);
@@ -53,6 +54,17 @@ export default function App() {
         };
     };
 
+    // プログラム側からカーソルを動かすときだけ selection を TextInput に強制適用する
+    const moveCursorTo = (sel: Selection) => {
+        setSelection(sel);
+        setForcedSelection(sel);
+    };
+
+    const handleSelectionChange = (sel: Selection) => {
+        setSelection(sel);
+        setForcedSelection(null);
+    };
+
     const handleChangeText = (newCode: string): void => {
         // タイピングバースト開始時にスナップショットを保存
         if (!isTypingRef.current) {
@@ -76,7 +88,7 @@ export default function App() {
         ) {
             const { newCode: indented, cursor } = buildNewline(start, end);
             setCode(indented);
-            setSelection({ start: cursor, end: cursor });
+            moveCursorTo({ start: cursor, end: cursor });
             return;
         }
 
@@ -87,7 +99,7 @@ export default function App() {
             if (deletedChar && PAIRS[deletedChar] && newCode[deletedPos] === PAIRS[deletedChar]) {
                 const withBothDeleted = newCode.substring(0, deletedPos) + newCode.substring(deletedPos + 1);
                 setCode(withBothDeleted);
-                setSelection({ start: deletedPos, end: deletedPos });
+                moveCursorTo({ start: deletedPos, end: deletedPos });
                 return;
             }
         }
@@ -102,7 +114,7 @@ export default function App() {
             setUndoStack(undoStack.slice(0, -1));
             setRedoStack(prev => [...prev, { code, selection }]);
             setCode(prev.code);
-            setSelection(prev.selection);
+            moveCursorTo(prev.selection);
             return;
         }
 
@@ -113,7 +125,7 @@ export default function App() {
             setRedoStack(redoStack.slice(0, -1));
             setUndoStack(prev => [...prev, { code, selection }]);
             setCode(next.code);
-            setSelection(next.selection);
+            moveCursorTo(next.selection);
             return;
         }
 
@@ -127,14 +139,14 @@ export default function App() {
             const beforeText = code.substring(0, selection.start);
             const afterText = code.substring(selection.end);
             setCode(beforeText + 'console.log()' + afterText);
-            setSelection({ start: selection.start + 12, end: selection.start + 12 });
+            moveCursorTo({ start: selection.start + 12, end: selection.start + 12 });
             return;
         }
 
         if (snippet === '改行') {
             const { newCode, cursor } = buildNewline(start, end);
             setCode(newCode);
-            setSelection({ start: cursor, end: cursor });
+            moveCursorTo({ start: cursor, end: cursor });
             return;
         }
 
@@ -142,7 +154,7 @@ export default function App() {
         const nextChar = code.charAt(end);
 
         const moveCursor = (pos: number) => {
-            setSelection({ start: pos, end: pos });
+            moveCursorTo({ start: pos, end: pos });
         };
 
         // 閉じカッコが次の文字と一致する場合はカーソルをスキップ
@@ -186,8 +198,8 @@ export default function App() {
                 activeTab={activeTab}
                 code={code}
                 setCode={handleChangeText}
-                selection={selection}
-                setSelection={setSelection}
+                selection={forcedSelection}
+                setSelection={handleSelectionChange}
                 textInputRef={textInputRef}
             />
             {activeTab === 'editor' && (

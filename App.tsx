@@ -25,6 +25,34 @@ export default function App() {
         isTypingRef.current = false;
     };
 
+    // カーソル位置がある行の先頭スペース（インデント）を取得
+    const getIndent = (text: string, pos: number): string => {
+        const lineStart = text.lastIndexOf('\n', pos - 1) + 1;
+        const match = text.slice(lineStart, pos).match(/^ */);
+        return match ? match[0] : '';
+    };
+
+    const buildNewline = (start: number, end: number): { newCode: string; cursor: number } => {
+        const beforeText = code.substring(0, start);
+        const afterText = code.substring(end);
+        const indent = getIndent(code, start);
+
+        // { の直後の改行はスマートインデント（次行を1段深くし、} を対応する位置に置く）
+        if (beforeText.endsWith('{')) {
+            const inner = indent + '  ';
+            const close = afterText.startsWith('}') ? '' : '}';
+            return {
+                newCode: beforeText + '\n' + inner + '\n' + indent + close + afterText,
+                cursor: start + 1 + inner.length,
+            };
+        }
+
+        return {
+            newCode: beforeText + '\n' + indent + afterText,
+            cursor: start + 1 + indent.length,
+        };
+    };
+
     const handleChangeText = (newCode: string): void => {
         // タイピングバースト開始時にスナップショットを保存
         if (!isTypingRef.current) {
@@ -37,6 +65,20 @@ export default function App() {
             isTypingRef.current = false;
             undoTimerRef.current = null;
         }, 500);
+
+        // キーボードからの改行にもオートインデントを適用
+        const { start, end } = selection;
+        if (
+            newCode.length === code.length - (end - start) + 1 &&
+            newCode.charAt(start) === '\n' &&
+            newCode.slice(0, start) === code.slice(0, start) &&
+            newCode.slice(start + 1) === code.slice(end)
+        ) {
+            const { newCode: indented, cursor } = buildNewline(start, end);
+            setCode(indented);
+            setSelection({ start: cursor, end: cursor });
+            return;
+        }
 
         if (newCode.length === code.length - 1) {
             const deletedPos = selection.start - 1;
@@ -89,7 +131,14 @@ export default function App() {
             return;
         }
 
-        const insertText = snippet === 'Tab' ? '  ' : snippet === '改行' ? '\n' : snippet;
+        if (snippet === '改行') {
+            const { newCode, cursor } = buildNewline(start, end);
+            setCode(newCode);
+            setSelection({ start: cursor, end: cursor });
+            return;
+        }
+
+        const insertText = snippet === 'Tab' ? '  ' : snippet;
         const nextChar = code.charAt(end);
 
         const moveCursor = (pos: number) => {

@@ -81,6 +81,14 @@ export default function App() {
         setRedoStack([]);
 
         const { start, end } = selection;
+        if (snippet === 'clog') {
+            const beforeText = code.substring(0, selection.start);
+            const afterText = code.substring(selection.end);
+            setCode(beforeText + 'console.log()' + afterText);
+            setSelection({ start: selection.start + 12, end: selection.start + 12 });
+            return;
+        }
+
         const insertText = snippet === 'Tab' ? '  ' : snippet === '改行' ? '\n' : snippet;
         const nextChar = code.charAt(end);
 

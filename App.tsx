@@ -8,6 +8,8 @@ import { Selection, TabType } from './src/types';
 
 const PAIRS: Record<string, string> = { '{': '}', '(': ')', '[': ']', '"': '"', "'": "'", '<': '>' };
 const CLOSING_CHARS = new Set(Object.values(PAIRS));
+// 閉じタグを持たない void 要素は自動クローズの対象外
+const VOID_TAGS = new Set(['br', 'hr', 'img', 'input', 'link', 'meta', 'area', 'base', 'col', 'embed', 'source', 'track', 'wbr']);
 
 export default function App() {
     const [activeTab, setActiveTab] = useState<TabType>('editor');
@@ -156,6 +158,19 @@ export default function App() {
         const moveCursor = (pos: number) => {
             moveCursorTo({ start: pos, end: pos });
         };
+
+        // HTML タグの自動クローズ（例: <div + > → <div></div>）
+        if (insertText === '>') {
+            const beforeText = code.substring(0, start);
+            const tagMatch = beforeText.match(/<([a-zA-Z][a-zA-Z0-9-]*)([^<>]*)$/);
+            if (tagMatch && !tagMatch[2].endsWith('/') && !VOID_TAGS.has(tagMatch[1].toLowerCase())) {
+                // 括弧補完で挿入済みの > がカーソル直後にある場合はそれを利用する
+                const afterText = code.substring(nextChar === '>' ? end + 1 : end);
+                setCode(beforeText + '>' + '</' + tagMatch[1] + '>' + afterText);
+                moveCursor(start + 1);
+                return;
+            }
+        }
 
         // 閉じカッコが次の文字と一致する場合はカーソルをスキップ
         if (CLOSING_CHARS.has(insertText) && nextChar === insertText) {
